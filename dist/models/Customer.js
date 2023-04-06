@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
 const CustomerSchema = new mongoose_1.default.Schema({
     username: {
         type: String,
@@ -22,32 +21,31 @@ const CustomerSchema = new mongoose_1.default.Schema({
         type: Date,
         default: new Date()
     },
+    fullname: {
+        type: String,
+        lowercase: true,
+        default: ""
+    },
     email: {
         type: String,
         lowercase: true,
+        default: ""
     },
     phoneNumber: {
         type: String,
-        minlength: 10,
-        maxlength: 10,
-        validate: {
-            validator: function (v) {
-                return /^\d{10}$/.test(v);
-            },
-            message: 'Phone number must be 10 digits'
-        }
+        default: ""
     },
     address: {
         type: String,
-        minlength: 10,
-        maxlength: 255,
-        validate: {
-            validator: function (v) {
-                return /^[a-zA-Z0-9\s]+$/.test(v);
-            },
-            message: 'Address must be alphanumeric'
-        }
+        default: ""
     },
+    cart: [{
+            bookID: String,
+            quantity: {
+                type: Number,
+                default: 0
+            }
+        }],
     isAdmin: {
         type: Boolean,
         default: false
@@ -61,13 +59,12 @@ const CustomerSchema = new mongoose_1.default.Schema({
         default: true
     }
 });
-CustomerSchema.pre("save", function (next) {
-    bcrypt_1.default.hash(this.password, 10, (err, hash) => {
-        if (err)
-            throw new Error();
-        this.password = hash;
-        next();
-    });
-});
+// CustomerSchema.pre("save", function (next) {
+//     bcrypt.hash(this.password, 10, (err, hash) => {
+//         if (err) throw new Error();
+//         this.password = hash;
+//         next();
+//     });
+// });
 const Customer = mongoose_1.default.model("Customer", CustomerSchema);
 exports.default = Customer;

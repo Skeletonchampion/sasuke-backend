@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import Customer from "../models/Customer.js";
 
 import { generateAccessToken } from "../utils/generateToken.js";
 
@@ -8,12 +9,13 @@ export default function authToken(req: Request, res: Response) {
 
     if(!refreshToken) return res.sendStatus(401);
 
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!, (err: any, decoded: DecodedPayload) => {
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!, async (err: any, decoded: any) => {
         if(err) return res.sendStatus(401);
-
-        const { username, date } = decoded;
-        const user = { username, date};
-        const accessToken = generateAccessToken(user);
+        
+        const customerID = decoded._id;
+        const customer = await Customer.findById(customerID).lean();
+        
+        const accessToken = generateAccessToken(customer);
         res.json({ accessToken });
     });
 }

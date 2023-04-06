@@ -10,7 +10,9 @@ const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const auth_route_js_1 = __importDefault(require("./routes/auth.route.js"));
+const auth_route_1 = __importDefault(require("./routes/auth.route"));
+const books_route_1 = __importDefault(require("./routes/books.route"));
+const customer_route_1 = __importDefault(require("./routes/customer.route"));
 const DB_URL = process.env["DB_URL"];
 mongoose_1.default.connect(DB_URL);
 const app = (0, express_1.default)();
@@ -22,7 +24,9 @@ app.use((0, cors_1.default)({
     credentials: true,
     exposedHeaders: ["set-cookie"],
 }));
-app.use("/auth", auth_route_js_1.default);
+app.use("/auth", auth_route_1.default);
+app.use("/books", books_route_1.default);
+app.use("/customer", customer_route_1.default);
 app.get("/", (req, res) => {
     res.send("okay");
 });
