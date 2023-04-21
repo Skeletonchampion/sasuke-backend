@@ -13,14 +13,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Customer_1 = __importDefault(require("../models/Customer"));
+const Order_1 = __importDefault(require("../models/Order"));
 function customerPlaceOrder(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const customerID = req.body.customerID;
             const cart = req.body.cart;
+            const totalPrice = req.body.totalPrice;
             const customer = yield Customer_1.default.findById(customerID);
+            const order = yield Order_1.default.findById(customerID);
             if (!customer) {
                 return res.json({ message: 'Customer not found!' });
+            }
+            if (!order) {
+                const updatedCart = customer.cart.map((item) => {
+                    return {
+                        quantity: item.quantity,
+                        book: item.bookID
+                    };
+                });
+                yield Order_1.default.create({
+                    customerID: customerID,
+                    items: updatedCart,
+                    totalPrice: totalPrice,
+                });
             }
             const customerCart = customer.cart;
             const ids1 = new Set(customerCart.map(item => item.bookID));

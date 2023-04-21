@@ -1,15 +1,33 @@
 import { Request, Response } from "express";
 import Customer from "../models/Customer";
+import Order from "../models/Order";
 
 export default async function customerPlaceOrder(req: Request, res: Response) {
     try {
         const customerID = req.body.customerID;
         const cart: { bookID: string, quantity: number }[] = req.body.cart;
+        const totalPrice = req.body.totalPrice;
 
         const customer = await Customer.findById(customerID);
+        const order = await Order.findById(customerID);
 
         if (!customer) {
             return res.json({ message: 'Customer not found!' });
+        }
+
+        if (!order) {
+            const updatedCart = customer.cart.map((item) => {
+                return {
+                    quantity: item.quantity,
+                    book: item.bookID
+                };
+            });
+
+            await Order.create({
+                customerID: customerID,
+                items: updatedCart,
+                totalPrice: totalPrice,
+            })
         }
 
         const customerCart = customer.cart;

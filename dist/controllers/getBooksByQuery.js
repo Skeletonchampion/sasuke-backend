@@ -17,7 +17,17 @@ function getBooksByQuery(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const query = req.params.query.toLowerCase();
-            const books = yield Book_1.default.find({ title: { $regex: new RegExp(query, 'i') } });
+            const books = yield Book_1.default.aggregate([
+                { $match: { title: { $regex: new RegExp(query, 'i') } } },
+                {
+                    $lookup: {
+                        from: 'book_reviews',
+                        localField: '_id',
+                        foreignField: 'bookID',
+                        as: 'reviews'
+                    }
+                }
+            ]);
             res.json(books);
         }
         catch (err) {

@@ -12,26 +12,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Book_1 = __importDefault(require("../models/Book"));
-function getBooksByCategory(req, res) {
+const BookReview_1 = __importDefault(require("../models/BookReview"));
+function customerAddReview(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const books = yield Book_1.default.aggregate([
-                { $match: { category: req.params.category } },
-                {
-                    $lookup: {
-                        from: 'book_reviews',
-                        localField: '_id',
-                        foreignField: 'bookID',
-                        as: 'reviews'
-                    }
-                }
-            ]);
-            res.json(books);
+            const { bookID, customerID, comment, rating } = req.body;
+            const body = Object.assign(Object.assign({}, req.body), { createdAt: new Date() });
+            yield BookReview_1.default.create(body);
+            return res.json({ message: "Successful adding review!" });
         }
         catch (err) {
-            throw new Error(err);
+            console.error(err);
+            return res.status(500).json({
+                message: 'Error adding review!',
+                error: err.message
+            });
         }
     });
 }
-exports.default = getBooksByCategory;
+exports.default = customerAddReview;

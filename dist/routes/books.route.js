@@ -11,7 +11,7 @@ const getBooksByCategory_1 = __importDefault(require("../controllers/getBooksByC
 const getBooksByQuery_1 = __importDefault(require("../controllers/getBooksByQuery"));
 const router = express_1.default.Router();
 router
-    .get("/all", getBooks_1.default)
+    .post("/all", getBooks_1.default)
     .get("/id/:id", getBook_1.default)
     .get("/category/:category", getBooksByCategory_1.default)
     .get("/search/:query", getBooksByQuery_1.default)

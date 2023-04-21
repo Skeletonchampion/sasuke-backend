@@ -9,7 +9,7 @@ import getBooksByQuery from "../controllers/getBooksByQuery";
 const router = express.Router();
 
 router
- .get("/all", getBooks)
+ .post("/all", getBooks)
  .get("/id/:id", getBook)
  .get("/category/:category", getBooksByCategory)
  .get("/search/:query", getBooksByQuery)
