@@ -20,7 +20,6 @@ function getCustomerOrders(req, res) {
             if (!customerID)
                 res.status(404).json({ message: "No customerID!" });
             const customerOrders = yield Order_1.default.find({ customerID }).populate('items.book');
-            ;
             res.json(customerOrders);
         }
         catch (err) {

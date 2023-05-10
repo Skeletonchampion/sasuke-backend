@@ -13,12 +13,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Book_1 = __importDefault(require("../models/Book"));
+const querystring_1 = __importDefault(require("querystring"));
 function getBooksByQuery(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const query = req.params.query.toLowerCase();
-            const books = yield Book_1.default.aggregate([
-                { $match: { title: { $regex: new RegExp(query, 'i') } } },
+            let author, title, keyword;
+            const queryObject = querystring_1.default.parse(req.url.split('?')[1]);
+            if (queryObject.author && typeof queryObject.author === "string")
+                author = queryObject.author.toLowerCase();
+            if (queryObject.title && typeof queryObject.title === "string")
+                title = queryObject.title.toLowerCase();
+            if (queryObject.keyword && typeof queryObject.keyword === "string")
+                keyword = queryObject.keyword.toLowerCase();
+            const match = { $match: { $and: [] } };
+            let pipeline = [
                 {
                     $lookup: {
                         from: 'book_reviews',
@@ -27,7 +35,21 @@ function getBooksByQuery(req, res) {
                         as: 'reviews'
                     }
                 }
-            ]);
+            ];
+            if (title)
+                match.$match.$and.push({ title: { $regex: new RegExp(title, 'i') } });
+            if (keyword)
+                match.$match.$and.push({ summary: { $regex: new RegExp(keyword, 'i') } });
+            if (author)
+                match.$match.$and.push({
+                    authors: {
+                        $elemMatch: {
+                            $regex: new RegExp(author, 'i')
+                        }
+                    }
+                });
+            pipeline.unshift(match);
+            const books = yield Book_1.default.aggregate(pipeline);
             res.json(books);
         }
         catch (err) {

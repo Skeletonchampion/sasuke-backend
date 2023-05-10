@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.route";
 import booksRouter from "./routes/books.route";
 import customerRouter from "./routes/customer.route";
+import eventLogRoute from "./routes/eventLog.route";
 
 const DB_URL = process.env["DB_URL"];
 mongoose.connect(DB_URL!);
@@ -27,6 +28,7 @@ app.use(cors({
 app.use("/auth", authRouter);
 app.use("/books", booksRouter);
 app.use("/customer", customerRouter);
+app.use("/eventLog", eventLogRoute)
 
 app.get("/", (req, res) => {
     res.send("okay");

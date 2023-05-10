@@ -13,30 +13,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Customer_1 = __importDefault(require("../models/Customer"));
+const EventLog_1 = __importDefault(require("../models/EventLog"));
 const Order_1 = __importDefault(require("../models/Order"));
+const emitEvent_1 = require("../utils/emitEvent");
 function customerPlaceOrder(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            let orderID;
             const customerID = req.body.customerID;
             const cart = req.body.cart;
             const totalPrice = req.body.totalPrice;
             const customer = yield Customer_1.default.findById(customerID);
-            const order = yield Order_1.default.findById(customerID);
+            const order = yield Order_1.default.findById(customerID).lean();
             if (!customer) {
                 return res.json({ message: 'Customer not found!' });
             }
-            if (!order) {
+            if (true) {
                 const updatedCart = customer.cart.map((item) => {
                     return {
                         quantity: item.quantity,
                         book: item.bookID
                     };
                 });
-                yield Order_1.default.create({
+                const order = yield Order_1.default.create({
                     customerID: customerID,
                     items: updatedCart,
                     totalPrice: totalPrice,
                 });
+                console.log(order);
+                orderID = order._id;
             }
             const customerCart = customer.cart;
             const ids1 = new Set(customerCart.map(item => item.bookID));
@@ -46,6 +51,18 @@ function customerPlaceOrder(req, res) {
             const newCart = [...unique1, ...unique2];
             customer.cart = newCart;
             yield customer.save();
+            const newEventLog = {
+                type: "customer_order",
+                date: new Date(),
+                log: `Customer ${customer.username} has placed an order.`,
+                data: {
+                    customerID: customer._id,
+                    username: customer.username,
+                    orderID: orderID
+                }
+            };
+            yield EventLog_1.default.create(newEventLog);
+            (0, emitEvent_1.emitEvent)(newEventLog);
             return res.json({ message: "Successfully placeorder!" });
         }
         catch (err) {

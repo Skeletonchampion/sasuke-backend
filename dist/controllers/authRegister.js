@@ -13,6 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Customer_1 = __importDefault(require("../models/Customer"));
+const EventLog_1 = __importDefault(require("../models/EventLog"));
+const emitEvent_1 = require("../utils/emitEvent");
 function authRegister(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const { username, password } = req.body;
@@ -25,7 +27,18 @@ function authRegister(req, res, next) {
             if (user) {
                 return res.json({ err: "This username's already be taken!" });
             }
-            yield Customer_1.default.create(req.body);
+            const customer = yield Customer_1.default.create(req.body);
+            const newEventLog = {
+                type: "customer_register",
+                date: new Date(),
+                log: `New customer with id %${customer._id}% has registered successfully.`,
+                data: {
+                    customerID: customer._id,
+                    username: customer.username
+                }
+            };
+            yield EventLog_1.default.create(newEventLog);
+            (0, emitEvent_1.emitEvent)(newEventLog);
             res.json({ message: "Successfully Registered!" });
         }
         catch (err) {

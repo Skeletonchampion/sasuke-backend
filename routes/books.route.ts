@@ -12,7 +12,7 @@ router
  .post("/all", getBooks)
  .get("/id/:id", getBook)
  .get("/category/:category", getBooksByCategory)
- .get("/search/:query", getBooksByQuery)
+ .get("/search?:query", getBooksByQuery)
  .get("/cart", getBooksByCart);
 
 export default router;

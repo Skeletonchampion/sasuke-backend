@@ -14,6 +14,6 @@ router
     .post("/all", getBooks_1.default)
     .get("/id/:id", getBook_1.default)
     .get("/category/:category", getBooksByCategory_1.default)
-    .get("/search/:query", getBooksByQuery_1.default)
+    .get("/search?:query", getBooksByQuery_1.default)
     .get("/cart", getBooksByCart_1.default);
 exports.default = router;

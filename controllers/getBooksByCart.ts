@@ -8,7 +8,7 @@ export default async function getBooksByCart(req: Request, res: Response) {
 
         const customerID = req.query.customerID;
         if(!customerID) res.status(404).json({ message: "No customerID!" })
-        
+
         const customer = await Customer.findById(customerID).lean();
 
         for(const item of customer.cart) {

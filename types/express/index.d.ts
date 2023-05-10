@@ -7,6 +7,13 @@ declare global {
         }
     }
 
+    interface EventLog {
+        type: String;
+        date: Date;
+        log: String;
+        data: Object;
+    }
+
     interface DecodedPayload {
         username: string;
     }

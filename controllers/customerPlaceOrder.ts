@@ -1,21 +1,26 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import Customer from "../models/Customer";
+import EventLog from "../models/EventLog";
 import Order from "../models/Order";
+import { emitEvent } from "../utils/emitEvent";
 
 export default async function customerPlaceOrder(req: Request, res: Response) {
     try {
+        let orderID;
+
         const customerID = req.body.customerID;
         const cart: { bookID: string, quantity: number }[] = req.body.cart;
         const totalPrice = req.body.totalPrice;
-
+        
         const customer = await Customer.findById(customerID);
-        const order = await Order.findById(customerID);
+        const order = await Order.findById(customerID).lean();
 
         if (!customer) {
             return res.json({ message: 'Customer not found!' });
         }
 
-        if (!order) {
+        if (true) {
             const updatedCart = customer.cart.map((item) => {
                 return {
                     quantity: item.quantity,
@@ -23,11 +28,13 @@ export default async function customerPlaceOrder(req: Request, res: Response) {
                 };
             });
 
-            await Order.create({
+            const order = await Order.create({
                 customerID: customerID,
                 items: updatedCart,
                 totalPrice: totalPrice,
-            })
+            });
+            console.log(order)
+            orderID = order._id;
         }
 
         const customerCart = customer.cart;
@@ -42,6 +49,19 @@ export default async function customerPlaceOrder(req: Request, res: Response) {
         customer.cart = newCart;
 
         await customer.save();
+
+        const newEventLog: EventLog = {
+            type: "customer_order",
+            date: new Date(),
+            log: `Customer ${customer.username} has placed an order.`,
+            data: {
+                customerID: customer._id,
+                username: customer.username,
+                orderID: orderID
+            }
+        }
+        await EventLog.create(newEventLog);
+        emitEvent(newEventLog);
 
         return res.json({ message: "Successfully placeorder!" });
     }

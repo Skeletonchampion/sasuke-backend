@@ -68,7 +68,7 @@ export default async function getBooks(req: Request, res: Response) {
                         }
                     });
                 }
-                else if(!ids && exIDs) {
+                else if (!ids && exIDs) {
                     const exIDs = req.body.exIDs;
                     const objectExIDs = exIDs.map((id: string) => new mongoose.Types.ObjectId(id));
 
@@ -78,6 +78,7 @@ export default async function getBooks(req: Request, res: Response) {
                 }
 
                 books = await Book.aggregate(pipeline);
+
                 break;
             }
             case "top-rated": {
